@@ -370,68 +370,50 @@
 
                     // Dados carregados com sucesso
 
-                    // AGRUPAR POR CONTA E CALCULAR SOMA ACUMULATIVA ATÉ A DATA FILTRO
+                    // LÓGICA CORRETA: AGRUPAR POR CONTA E CALCULAR SALDO ACUMULADO
                     const contasPorChave = {};
                     
-                    // Primeiro, agrupar todos os registros por conta
-                    dadosView.forEach(item => {
+                    // Filtrar dados por data ANTES de agrupar
+                    const dadosFiltradosPorData = dataFiltro 
+                        ? dadosView.filter(item => item.d_dt_pagamento <= dataFiltro)
+                        : dadosView;
+                    
+                    // Filtro de data aplicado
+                    
+                    // Agrupar por conta e somar valor_corrigido
+                    dadosFiltradosPorData.forEach(item => {
                         const chave = `${item.empresa}|${item.conta_corrente_descricao}`;
                         
                         if (!contasPorChave[chave]) {
                             contasPorChave[chave] = {
                                 empresa: item.empresa,
                                 conta_corrente_descricao: item.conta_corrente_descricao,
-                                registros: []
+                                saldo_total: 0,
+                                qtd_movimentos: 0,
+                                saldo_inicial: 0
                             };
                         }
                         
-                        contasPorChave[chave].registros.push({
-                            data: item.d_dt_pagamento,
-                            valor: parseFloat(item.valor_corrigido || 0),
-                            tipo: item.tipo
-                        });
+                        const valor = parseFloat(item.valor_corrigido || 0);
+                        contasPorChave[chave].saldo_total += valor;
+                        contasPorChave[chave].qtd_movimentos++;
+                        
+                        // Separar saldo inicial para exibição
+                        if (item.tipo === 'SALDO_INICIAL') {
+                            contasPorChave[chave].saldo_inicial += valor;
+                        }
                     });
 
-                    // Calcular soma acumulativa para cada conta
-                    const dadosProcessados = [];
+                    // Converter para array final
+                    const dadosProcessados = Object.values(contasPorChave).map(conta => ({
+                        empresa: conta.empresa,
+                        conta_corrente_descricao: conta.conta_corrente_descricao,
+                        saldo_inicial: conta.saldo_inicial,
+                        valor_corrigido: conta.saldo_total, // SALDO TOTAL ACUMULADO
+                        qtd_movimentos: conta.qtd_movimentos
+                    }));
                     
-                    Object.values(contasPorChave).forEach(conta => {
-                        // Ordenar registros por data
-                        conta.registros.sort((a, b) => new Date(a.data) - new Date(b.data));
-                        
-                        let somaAcumulada = 0;
-                        let qtdMovimentos = 0;
-                        
-                        // Somar todos os valores até a data filtro (inclusive)
-                        conta.registros.forEach(registro => {
-                            if (registro.data <= dataFiltro) {
-                                somaAcumulada += registro.valor;
-                                qtdMovimentos++;
-                            }
-                        });
-                        
-                        // Debug para conta específica
-                        if (conta.empresa === '3SA' && conta.conta_corrente_descricao === 'Cartão - Caixinha - RH') {
-                            console.log('🔍 DEBUG Cartão - Caixinha - RH:');
-                            console.log('  - Registros encontrados:', conta.registros.length);
-                            console.log('  - Registros até data filtro:', qtdMovimentos);
-                            console.log('  - Soma acumulada:', somaAcumulada);
-                            console.log('  - Detalhes:', conta.registros.filter(r => r.data <= dataFiltro));
-                        }
-                        
-                        // Adicionar conta processada (se teve movimentos até a data ou se não há filtro)
-                        if (qtdMovimentos > 0 || !dataFiltro) {
-                            dadosProcessados.push({
-                                empresa: conta.empresa,
-                                conta_corrente_descricao: conta.conta_corrente_descricao,
-                                saldo_inicial: 0, // Não faz mais sentido separar
-                                valor_corrigido: somaAcumulada,
-                                qtd_movimentos: qtdMovimentos
-                            });
-                        }
-                    });
-
-                    console.log('📊 Dados processados:', dadosProcessados.length);
+                    // Processamento concluído
 
                     // LOG DE DEBUG para a conta específica
                     const contaDebug = dadosProcessados.find(item => 

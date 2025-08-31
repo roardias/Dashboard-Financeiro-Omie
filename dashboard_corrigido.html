@@ -320,11 +320,7 @@
                 try {
                     setLoading(true);
                     setError('');
-                    console.log('🚀 Carregando dados com FILTRO DE DATA usando view correta...');
-                    console.log('📅 Data filtro:', dataFiltro);
-
-                    // USAR A VIEW UNIFICADA: vw_saldo_acumulado - BUSCAR TODOS OS DADOS
-                    console.log('🔄 Buscando TODOS os dados (paginação ativa)...');
+                    // Carregando dados da view unificada
                     
                     let todosOsDados = [];
                     let offset = 0;
@@ -358,7 +354,7 @@
                         
                         if (errorView) throw errorView;
                         
-                        console.log(`📄 Página ${Math.floor(offset/limit) + 1}: ${dadosPagina.length} registros`);
+                        // Carregando página de dados
                         
                         todosOsDados = [...todosOsDados, ...dadosPagina];
                         
@@ -372,9 +368,7 @@
 
                     const dadosView = todosOsDados;
 
-                    console.log('📊 Dados brutos da view unificada:', dadosView.length);
-                    console.log('🔍 Primeiros 5 registros:', dadosView.slice(0, 5));
-                    console.log('📈 Empresas únicas nos dados brutos:', [...new Set(dadosView.map(item => item.empresa))]);
+                    // Dados carregados com sucesso
 
                     // AGRUPAR POR CONTA E CALCULAR SOMA ACUMULATIVA ATÉ A DATA FILTRO
                     const contasPorChave = {};
@@ -457,8 +451,7 @@
 
                     // Extrair empresas
                     const empresasUnicas = [...new Set(dadosProcessados.map(item => item.empresa))].sort();
-                    console.log('🏢 Empresas encontradas:', empresasUnicas);
-                    console.log('🔢 Total de empresas:', empresasUnicas.length);
+                    // Empresas extraídas com sucesso
                     setEmpresas(empresasUnicas);
 
                     // Calcular estatísticas
@@ -534,8 +527,7 @@
 
                     // Extrair empresas
                     const empresasUnicas = [...new Set(dadosProcessados.map(item => item.empresa))].sort();
-                    console.log('🏢 Empresas encontradas:', empresasUnicas);
-                    console.log('🔢 Total de empresas:', empresasUnicas.length);
+                    // Empresas extraídas com sucesso
                     setEmpresas(empresasUnicas);
 
                     // Calcular estatísticas

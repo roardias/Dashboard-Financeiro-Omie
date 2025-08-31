@@ -580,7 +580,7 @@
                 totalEmpresas: empresaSelecionada === 'TODAS' ? 
                     new Set(dadosFiltrados.map(item => item.empresa)).size : 1,
                 totalCombinacoes: dadosFiltrados.length,
-                somaTotal: dadosFiltrados.reduce((acc, item) => acc + item.valor_corrigido, 0)
+                somaTotal: dadosFiltrados.reduce((acc, item) => acc + parseFloat(item.valor_corrigido || 0), 0)
             };
 
             const downloadCSV = () => {
